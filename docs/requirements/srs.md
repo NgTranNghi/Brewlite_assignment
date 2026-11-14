@@ -126,3 +126,36 @@
 | **NFR-05** | **Khả năng triển khai** | Toàn bộ hệ thống (Web, API, PostgreSQL) có thể khởi chạy đồng bộ trên môi trường cục bộ chỉ với một câu lệnh: `docker compose up --build`. | `(T)` Smoke test container |
 | **NFR-06** | **Tích hợp liên tục (CI/CD Quality Gate)**| Mọi Pull Request bắt buộc phải vượt qua bộ lọc chất lượng tự động: Linting không có cảnh báo nghiêm trọng, 100% Unit test pass, quá trình Build thành công. | `(T)` GitHub Actions |
 ---
+
+---
+
+# 3. Sơ Đồ Use-Case Tổng Quát Toàn Hệ Thống
+
+Sơ đồ thể hiện ranh giới hệ thống (*System Boundary*), các tác nhân ngoài (*Actors*) và mối quan hệ `<<include>>`, `<<extend>>` giữa các ca sử dụng cốt lõi:
+
+```mermaid
+flowchart LR
+    Customer((Khách hàng))
+    PG((Cổng thanh toán))
+
+    subgraph BrewLite_System ["HỆ THỐNG BREWLITE"]
+        UC1(["Xem thực đơn & Chi tiết"])
+        UC2(["Tùy biến món & Giỏ hàng"])
+        UC3(["Đăng nhập / Xác thực"])
+        UC4(["Đặt đơn hàng"])
+        UC5(["Thanh toán đơn hàng"])
+        UC6(["Theo dõi đơn & Lịch sử"])
+        UC7(["Áp dụng mã giảm giá"])
+    end
+
+    Customer --> UC1
+    Customer --> UC2
+    Customer --> UC4
+    Customer --> UC6
+
+    UC4 -.->|"<<include>>"| UC3
+    UC4 -.->|"<<include>>"| UC5
+    UC5 -.->|"<<extend>>"| UC7
+    UC5 --> PG
+```
+*(Chi tiết mã nguồn PlantUML lưu tại `docs/diagrams/usecase-overview.puml`)*.
