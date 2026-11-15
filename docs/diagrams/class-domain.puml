@@ -1,0 +1,178 @@
+@startuml class-domain
+'==============================================================
+' BrewLite – Biểu đồ lớp mức miền (Domain Class Diagram)
+' Mô hình hóa cấu trúc thực thể, kiểu liệt kê và quan hệ nghiệp vụ
+' Chuẩn môn học: Công nghệ phần mềm - ĐH Sài Gòn (GVHD: ThS. Từ Lãng Phiêu)
+' Task 2.3 (Assignment 2)
+'==============================================================
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 0
+skinparam dpi 150
+skinparam classAttributeIconSize 0
+hide circle
+
+'================ Kiểu liệt kê (Enumerations) ================
+
+enum Role {
+  CUSTOMER
+  STAFF
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  READY
+  COMPLETED
+  PAYMENT_FAILED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MOMO
+  VNPAY
+  CARD
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+}
+
+enum LoyaltyTransactionType {
+  EARN
+  REDEEM
+}
+
+enum Size {
+  S
+  M
+  L
+}
+
+'================ Thực thể miền (Domain Entities) ================
+
+class User {
+  - id : Int
+  - email : String
+  - passwordHash : String
+  - role : Role
+  - loyaltyPoints : Int
+  - createdAt : DateTime
+  - updatedAt : DateTime
+  __
+  + register() : User
+  + login() : String
+  + addLoyaltyPoints(points : Int) : void
+}
+
+class Product {
+  - id : Int
+  - name : String
+  - category : String
+  - basePrice : Int
+  - imageUrl : String
+  - description : String
+  - stock : Int
+  - version : Int
+  - isAvailable : Boolean
+  - sizeOptions : Json
+  - toppingOptions : Json
+  __
+  + checkAvailability(qty : Int) : Boolean
+  + deductStockWithOptimisticLock(qty : Int) : void
+}
+
+class Order {
+  - id : Int
+  - orderCode : String
+  - userId : Int
+  - status : OrderStatus
+  - total : Int
+  - discountAmount : Int
+  - finalAmount : Int
+  - promotionCode : String
+  - createdAt : DateTime
+  - updatedAt : DateTime
+  __
+  + calculateTotal() : Int
+  + applyPromotion(promo : Promotion) : void
+  + transitionTo(newStatus : OrderStatus) : void
+}
+
+class OrderItem {
+  - id : Int
+  - orderId : Int
+  - productId : Int
+  - size : Size
+  - selectedToppings : Json
+  - qty : Int
+  - unitPrice : Int
+  - lineTotal : Int
+  __
+  + calculateLineTotal() : Int
+}
+
+class Payment {
+  - id : Int
+  - orderId : Int
+  - idempotencyKey : String
+  - amount : Int
+  - method : PaymentMethod
+  - status : PaymentStatus
+  - transactionInfo : String
+  - createdAt : DateTime
+  __
+  + verifyIdempotency() : Boolean
+  + executePayment() : PaymentStatus
+}
+
+class Promotion {
+  - id : Int
+  - code : String
+  - description : String
+  - discountPercent : Int
+  - maxDiscount : Int
+  - minOrderValue : Int
+  - isAvailable : Boolean
+  - expiresAt : DateTime
+  __
+  + isValid(orderTotal : Int) : Boolean
+  + computeDiscount(orderTotal : Int) : Int
+}
+
+class LoyaltyTransaction {
+  - id : Int
+  - userId : Int
+  - orderId : Int
+  - points : Int
+  - type : LoyaltyTransactionType
+  - createdAt : DateTime
+  __
+  + recordTransaction() : void
+}
+
+'================ Mối quan hệ và Liên kết (Relationships) ================
+
+User "1" --> "0..*" Order : places >
+User "1" --> "0..*" LoyaltyTransaction : owns >
+User ..> Role : uses
+
+Order "1" *-- "1..*" OrderItem : contains >
+Order "1" --> "0..*" Payment : paid via >
+Order "0..*" --> "0..1" Promotion : applies >
+Order "1" --> "0..*" LoyaltyTransaction : generates >
+Order ..> OrderStatus : uses
+
+OrderItem "0..*" --> "1" Product : references >
+OrderItem ..> Size : uses
+
+Payment ..> PaymentMethod : uses
+Payment ..> PaymentStatus : uses
+
+LoyaltyTransaction ..> LoyaltyTransactionType : uses
+
+@enduml
