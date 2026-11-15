@@ -139,13 +139,13 @@ flowchart LR
     PG((Cổng thanh toán))
 
     subgraph BrewLite_System ["HỆ THỐNG BREWLITE"]
-        UC1(["Xem thực đơn & Chi tiết"])
+        UC1(["Xem thực đơn"])
         UC2(["Tùy biến món & Giỏ hàng"])
-        UC3(["Đăng nhập / Xác thực"])
+        UC3(["Đăng nhập"])
         UC4(["Đặt đơn hàng"])
         UC5(["Thanh toán đơn hàng"])
         UC6(["Theo dõi đơn & Lịch sử"])
-        UC7(["Áp dụng mã giảm giá"])
+        UC7(["Áp dụng khuyến mãi"])
     end
 
     Customer --> UC1
