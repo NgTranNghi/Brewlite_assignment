@@ -1,0 +1,195 @@
+@startuml sequence-checkout
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 0
+skinparam dpi 150
+hide footbox
+
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+
+skinparam participant {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+
+skinparam sequence {
+  LifeLineBorderColor #000000
+  LifeLineBackgroundColor #FFFFFF
+  ArrowColor #000000
+  ActorBorderColor #000000
+  ActorBackgroundColor #FFFFFF
+  GroupBorderColor #000000
+  GroupBackgroundColor #FFFFFF
+}
+
+autonumber "<b>[00]</b>"
+
+actor "Khách hàng" as C
+participant "Next.js Web" as UI
+participant "NestJS API" as API
+database "PostgreSQL" as DB
+participant "Payment Service" as PG
+
+== Giai đoạn 1: Kiểm tra phiên đăng nhập ==
+
+C -> UI : clickCheckout() tại /cart
+activate UI
+UI -> UI : checkAuthToken()
+
+alt chưa đăng nhập hoặc token hết hạn
+  UI --> C : openAuthModal()
+  C -> UI : submitLogin(email, password)
+  UI -> API : POST /api/auth/login
+  activate API
+  API -> DB : findUserByEmail(email)
+  DB --> API : user + passwordHash
+  API -> API : comparePassword(hash)
+  API --> UI : 200 OK { accessToken, user }
+  deactivate API
+  UI -> UI : saveToken(localStorage)
+  UI -> UI : router.push('/checkout')
+else đã đăng nhập
+  UI -> UI : router.push('/checkout')
+end
+UI --> C : renderCheckoutPage()
+deactivate UI
+
+== Giai đoạn 2: Khởi tạo đơn hàng ==
+
+C -> UI : submitOrder(method, promoCode)
+activate UI
+UI -> UI : disableButton()
+
+UI -> API : POST /api/orders\n[Bearer JWT] { items, promoCode }
+activate API
+
+API -> API : verifyJwt()
+alt token không hợp lệ
+  API --> UI : 401 Unauthorized
+  UI --> C : requireLogin()
+else token hợp lệ
+  API -> API : validateDto()
+  alt DTO không hợp lệ
+    API --> UI : 400 Bad Request
+    UI --> C : showValidationError()
+  else DTO hợp lệ
+    API -> DB : beginTransaction()
+    API -> DB : lockProducts(productIds)
+    DB --> API : products [price, stock, version]
+
+    API -> API : recalculatePrices()
+
+    alt số lượng vượt tồn kho
+      API -> DB : rollback()
+      API --> UI : 409 Conflict "Hết hàng"
+      UI --> C : showStockError()
+    else tồn kho hợp lệ
+      alt có mã giảm giá
+        API -> DB : findPromotion(code)
+        DB --> API : promotion
+        API -> API : calculateDiscount()
+      end
+      API -> DB : insertOrder(PENDING, finalAmount)
+      API -> DB : insertOrderItems(items)
+      API -> DB : commit()
+      DB --> API : order
+      API --> UI : 201 Created { id, orderCode, PENDING, finalAmount }
+    end
+  end
+end
+deactivate API
+
+UI -> UI : verifyFinalAmount()
+deactivate UI
+
+== Giai đoạn 3: Thanh toán idempotent ==
+
+UI -> UI : generateIdempotencyKey()
+activate UI
+UI -> API : POST /api/payments\n[Idempotency-Key] { orderId, method, amount }
+activate API
+
+API -> API : verifyJwt()
+API -> DB : findOrderById(orderId)
+DB --> API : order
+
+alt đơn không thuộc user
+  API --> UI : 404 Not Found
+  UI --> C : showNotFoundError()
+else đơn hợp lệ
+  API -> DB : findPaymentByKey(idempotencyKey)
+  DB --> API : payment
+
+  alt key đã tồn tại
+    alt key thuộc đơn khác
+      API --> UI : 409 Conflict
+      UI --> C : showDuplicateKeyError()
+    else key thuộc đơn này
+      API --> UI : 200 OK { idempotentReplay: true, PAID }
+    end
+  else key mới
+    API -> PG : charge(orderId, amount, method, key)
+    activate PG
+    PG -> PG : processTransaction()
+    PG --> API : chargeResult (SUCCESS / FAILED)
+    deactivate PG
+
+    alt thanh toán thất bại
+      API -> DB : beginTransaction()
+      API -> DB : updateOrderStatus(PAYMENT_FAILED)
+      API -> DB : insertPayment(FAILED)
+      API -> DB : commit()
+      API --> UI : 200 OK { status: FAILED }
+      UI --> C : showPaymentFailed()
+    else thanh toán thành công
+      API -> DB : beginTransaction()
+      API -> DB : updateOrderStatus(PAID)
+
+      alt 0 dòng cập nhật (đơn đã thanh toán trước đó)
+        API -> DB : rollback()
+        API --> UI : 409 Conflict
+        UI --> C : showAlreadyPaidError()
+      else 1 dòng cập nhật
+        loop từng món trong đơn
+          API -> DB : deductStock(productId, qty, version)
+        end
+        alt xung đột version / hết tồn kho
+          API -> DB : rollback()
+          API --> UI : 409 Conflict
+          UI --> C : showStockConflictError()
+        else trừ kho thành công
+          API -> DB : addLoyaltyPoints(userId, points)
+          API -> DB : insertLoyaltyTx(EARN)
+          API -> DB : insertPayment(SUCCESS)
+          API -> DB : commit()
+          API --> UI : 201 Created { paymentId, SUCCESS, PAID, points }
+        end
+      end
+    end
+  end
+end
+deactivate API
+
+== Giai đoạn 4: Xác nhận đơn và Polling trên Web ==
+
+UI -> UI : clearCart()
+UI -> UI : router.push('/orders/:id')
+UI --> C : renderOrderConfirmation(orderCode, PAID)
+
+loop mỗi 5 giây polling
+  UI -> API : GET /api/orders/:id [Bearer JWT]
+  activate API
+  API -> DB : findOrderById(orderId)
+  DB --> API : order (status: PREPARING)
+  API --> UI : 200 OK { status: PREPARING }
+  deactivate API
+  UI -> UI : updateOrderStatus(PREPARING)
+end
+
+deactivate UI
+
+@enduml
