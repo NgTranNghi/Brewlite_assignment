@@ -1,0 +1,100 @@
+@startuml usecase-overview
+'==============================================================
+' BrewLite – Sơ đồ use-case tổng quát của toàn hệ thống
+' Task 1.2 & 1.3 (Assignment 2) | Nguồn: docs/requirements/srs.md
+'==============================================================
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+
+skinparam usecase {
+  BackgroundColor #F5F7FA
+  BorderColor #2C3E50
+  ArrowColor #2C3E50
+  FontColor #1B2631
+}
+
+skinparam actor {
+  BackgroundColor #2C3E50
+  BorderColor #1B2631
+  FontColor #1B2631
+}
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #2C3E50
+  FontStyle bold
+}
+
+left to right direction
+
+actor "Khách hàng" as Customer
+actor "Dịch vụ thanh toán\n(External Gateway)" as PaymentService
+actor "Nhân viên pha chế\n(Barista)" as Barista
+
+rectangle "Hệ thống BrewLite" {
+  ' --- Nhóm Duyệt món & Giỏ hàng ---
+  usecase "Xem menu sản phẩm" as UC_Menu
+  usecase "Quản lý giỏ hàng" as UC_Cart
+
+  ' --- Nhóm Xác thực ---
+  usecase "Đăng ký / Đăng nhập\n(JWT)" as UC_Auth
+
+  ' --- Nhóm Đặt đơn & Thanh toán (Trọng tâm) ---
+  usecase "Đặt và thanh toán" as UC_Checkout <<focus>>
+  usecase "Kiểm tra thanh toán" as UC_VerifyPayment
+  usecase "Áp dụng khuyến mãi" as UC_Promotion
+  usecase "Hủy đơn chưa trả tiền" as UC_CancelOrder
+
+  ' --- Nhóm Theo dõi & Vận hành quầy ---
+  usecase "Theo dõi tiến độ đơn" as UC_TrackOrder
+  usecase "Cập nhật trạng thái pha chế" as UC_UpdateStatus
+  usecase "Yêu cầu / duyệt đổi món" as UC_Exchange
+}
+
+' ==============================================================
+' 1. Tương tác của Khách hàng (Customer)
+' ==============================================================
+Customer -- UC_Menu
+Customer -- UC_Cart
+Customer -- UC_Auth
+Customer -- UC_Checkout
+Customer -- UC_TrackOrder
+Customer -- UC_Exchange
+
+' ==============================================================
+' 2. Tương tác của Đối tác Thanh toán (Payment Service)
+' ==============================================================
+PaymentService -- UC_VerifyPayment
+
+' ==============================================================
+' 3. Tương tác của Nhân viên pha chế (Barista)
+' ==============================================================
+Barista -- UC_UpdateStatus
+Barista -- UC_Exchange
+Barista -- UC_TrackOrder
+
+' ==============================================================
+' 4. Quan hệ nội bộ giữa các Use Case (<<include>> & <<extend>>)
+' ==============================================================
+' Đặt và thanh toán BẮT BUỘC phải xác thực tài khoản và kiểm tra thanh toán
+UC_Checkout ..> UC_Auth : <<include>>
+UC_Checkout ..> UC_VerifyPayment : <<include>>
+
+' Áp dụng mã giảm giá và Hủy đơn là hành vi MỞ RỘNG (tùy chọn hoặc ngoại lệ)
+UC_Promotion ..> UC_Checkout : <<extend>>
+UC_CancelOrder ..> UC_Checkout : <<extend>>
+
+note right of UC_Checkout
+  **Use-case trọng tâm** (Task 1.3)
+  Đặc tả chi tiết tại:
+  docs/requirements/use-case-checkout.md
+end note
+
+note bottom of UC_UpdateStatus
+  Phạm vi mở rộng (Sprint 2 / Backlog):
+  Nhân viên cập nhật trạng thái
+  PREPARING → READY → COMPLETED
+end note
+
+@enduml
