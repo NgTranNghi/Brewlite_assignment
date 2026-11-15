@@ -1,0 +1,588 @@
+\documentclass[11pt, a4paper]{article}
+
+% ==============================================================================
+% GÓI CƠ BẢN VÀ ĐỊNH DẠNG TRANG (TỐI ƯU CHO XELATEX)
+% ==============================================================================
+\usepackage{fontspec}
+\setmainfont{Liberation Serif} % Hoặc Times New Roman nếu đã cài font Microsoft trên Debian
+\setsansfont{Liberation Sans}
+\setmonofont{DejaVu Sans Mono}
+\usepackage{tabularx}
+\usepackage{polyglossia}
+\setmainlanguage{vietnamese}
+
+\usepackage{geometry}
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=2.2cm, right=2.2cm}
+
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\setlist{nosep}
+% Màu sắc và bảng biểu
+\usepackage[table]{xcolor}
+\definecolor{primary}{HTML}{1A365D}    % Xanh đậm tiêu đề
+\definecolor{secondary}{HTML}{2B6CB0}  % Xanh dương mục
+\definecolor{accent}{HTML}{C53030}     % Đỏ nhấn
+\definecolor{darktext}{HTML}{2D3748}   % Chữ xám đậm
+\definecolor{lightbg}{HTML}{F7FAFC}    % Nền xám nhạt
+\definecolor{calloutbg}{HTML}{EBF8FF}  % Nền hộp ghi chú
+\definecolor{tableheader}{HTML}{EDF2F7}% Nền tiêu đề bảng
+\definecolor{bordercolor}{HTML}{CBD5E0}% Màu viền
+
+% Hộp khối ghi chú
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{calloutbox}[1][]{
+  enhanced,
+  colback=calloutbg,
+  colframe=secondary,
+  leftrule=4pt,
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  arc=3pt,
+  boxsep=4pt,
+  left=8pt,
+  right=8pt,
+  top=6pt,
+  bottom=6pt,
+  coltitle=secondary,
+  fonttitle=\bfseries\small,
+  title=#1,
+  breakable
+}
+
+% Định dạng mã nguồn
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize\color{darktext},
+  backgroundcolor=\color{lightbg},
+  frame=single,
+  rulecolor=\color{bordercolor},
+  breaklines=true,
+  tabsize=2,
+  showstringspaces=false,
+  captionpos=b,
+  xleftmargin=10pt,
+  xrightmargin=10pt
+}
+
+% Header và Footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{darktext}BrewLite -- Báo cáo Thiết kế Kiến trúc (Task 3.1)}
+\fancyhead[R]{\small\color{darktext}Khoa CNTT -- Trường ĐH Sài Gòn}
+\fancyfoot[L]{\small\color{gray}Assignment 2: Requirements to Deployment -- Ver 1.0}
+\fancyfoot[R]{\small\bfseries\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Hyperlink
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=secondary,
+  citecolor=secondary,
+  urlcolor=secondary
+}
+
+% Định dạng tiêu đề phần
+\usepackage{titlesec}
+\titleformat{\section}
+  {\color{primary}\normalfont\Large\bfseries}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\color{secondary}\normalfont\large\bfseries}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\color{darktext}\normalfont\normalsize\bfseries}
+  {\thesubsubsection}{1em}{}
+
+% Giãn cách đoạn văn
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+% ==============================================================================
+% BẮT ĐẦU TÀI LIỆU
+% ==============================================================================
+\begin{document}
+
+% ------------------------------------------------------------------------------
+% TRANG TIÊU ĐỀ / PHẦN ĐẦU
+% ------------------------------------------------------------------------------
+\begin{center}
+	{\large\bfseries\color{primary} TRƯỜNG ĐẠI HỌC SÀI GÒN}\\[2pt]
+	{\bfseries\color{secondary} KHOA CÔNG NGHỆ THÔNG TIN}\\[2pt]
+	{\small\color{darktext} BỘ MÔN CÔNG NGHỆ PHẦN MỀM}\\[10pt]
+	\rule{0.6\textwidth}{1.2pt}\\[14pt]
+
+	{\LARGE\bfseries\color{primary} BÁO CÁO THIẾT KẾ KIẾN TRÚC HỆ THỐNG}\\[6pt]
+	{\Large\bfseries\color{accent} HỆ THỐNG ĐẶT CÀ PHÊ TRỰC TUYẾN BREWLITE}\\[6pt]
+	{\itshape\color{darktext} Task 3.1: Phương pháp và Quyết định Kiến trúc (Assignment 2)}\\[10pt]
+	\rule{0.6\textwidth}{1.2pt}\\[15pt]
+\end{center}
+
+\begin{minipage}[t]{0.48\textwidth}
+	\begin{tcolorbox}[colback=lightbg, colframe=bordercolor, arc=3pt, title={\bfseries THÔNG TIN DỰ ÁN}, coltitle=secondary]
+		\small
+		\begin{itemize}
+			\item \textbf{Môn học:} Công nghệ Phần mềm
+			\item \textbf{Học kỳ:} I -- Năm học 2026--2027
+			\item \textbf{Đề tài:} BrewLite (Ordering \& Cashless)
+			\item \textbf{Phiên bản:} 1.0 (Release Candidate)
+			\item \textbf{Mô hình:} Monorepo (GitHub)
+		\end{itemize}
+	\end{tcolorbox}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+	\begin{tcolorbox}[colback=lightbg, colframe=bordercolor, arc=3pt, title={\bfseries CÔNG NGHỆ BẮT BUỘC}, coltitle=secondary]
+		\small
+		\begin{itemize}
+			\item \textbf{Frontend:} Next.js (Mobile-first / PWA)
+			\item \textbf{Backend:} NestJS 10 (Modular REST API)
+			\item \textbf{CSDL:} PostgreSQL 15 (Prisma ORM)
+			\item \textbf{Container \& CI/CD:} Docker, GitHub Actions
+			\item \textbf{Production:} Render PaaS
+		\end{itemize}
+	\end{tcolorbox}
+\end{minipage}
+
+\vspace{10pt}
+
+\vspace{5pt\begin{table}[h!]
+		\small
+		\centering
+		\begin{tabularx}{\textwidth}{p{3.2cm} X p{2.2cm}}
+			\toprule
+			\rowcolor{tableheader}
+			\textbf{Tài liệu liên quan} & \textbf{Đường dẫn trong kho mã nguồn}             & \textbf{Nhiệm vụ bàn giao} \\
+			\midrule
+			Kiến trúc tổng thể          & \texttt{docs/architecture/architecture.md}        & Task 3.1                   \\
+			Các quyết định ADR          & \texttt{docs/architecture/adr/001..006.md}        & Task 3.1 (ADR)             \\
+			Sơ đồ triển khai UML        & \texttt{docs/diagrams/deployment-production.puml} & Task 3.2                   \\
+			Đặc tả yêu cầu SRS          & \texttt{docs/requirements/srs.md}                 & Task 1.2                   \\
+			Use-case đặt hàng           & \texttt{docs/requirements/use-case-checkout.md}   & Task 1.3                   \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}}
+
+% ==============================================================================
+% NỘI DUNG CHÍNH
+% ==============================================================================
+
+\section{Tổng quan hệ thống và Phương pháp luận kiến trúc}
+
+\subsection{Bối cảnh và Tầm nhìn sản phẩm (Product Vision)}
+
+BrewLite là ứng dụng đặt đồ uống trực tuyến hướng tới mô hình \textbf{không dùng tiền mặt (cashless)} dành cho các quán cà phê vừa và nhỏ. Mục tiêu cốt lõi của BrewLite là xóa bỏ tình trạng tắc nghẽn xếp hàng tại quầy trong khung giờ cao điểm, loại bỏ rủi ro thất thoát khi thanh toán thủ công và mang lại trải nghiệm gọi món liền mạch, tiện lợi trong vòng dưới 60 giây.
+
+Luồng nghiệp vụ tối thiểu khả thi (MVP) của hệ thống bao gồm 6 giai đoạn:
+\begin{center}
+	\textbf{\color{secondary} Xem menu $\to$ Chọn tùy chọn (Size/Topping) $\to$ Giỏ hàng $\to$ Đặt đơn $\to$ Thanh toán $\to$ Theo dõi đơn}
+\end{center}
+
+Để hiện thực hóa sản phẩm, đề bài Assignment 2 quy định chặt chẽ ba thành phần công nghệ cốt lõi:
+\begin{enumerate}
+	\item \textbf{Frontend:} Next.js theo hướng Mobile-first / Progressive Web App (PWA).
+	\item \textbf{Backend:} NestJS tổ chức theo kiến trúc module/domain hướng dịch vụ.
+	\item \textbf{Cơ sở dữ liệu:} PostgreSQL 15, quản lý thực thể và di chuyển schema bằng Prisma ORM.
+\end{enumerate}
+
+\subsection{Phương pháp luận kiến trúc: C4 Model kết hợp Kiến trúc phân lớp}
+
+Dự án áp dụng mô hình kiến trúc hai chiều nhằm bảo đảm tính bao quát từ tầm nhìn vĩ mô đến chi tiết cài đặt mã nguồn:
+\begin{itemize}
+	\item \textbf{Mô hình C4 (Context, Container, Component, Code):} Giúp trực quan hóa cấu trúc hệ thống ở các cấp độ trừu tượng khác nhau, phục vụ giao tiếp hiệu quả giữa các bên liên quan (Stakeholders) và nhóm kỹ thuật.
+	\item \textbf{Kiến trúc phân lớp 3 tầng (3-Tier Layered Architecture):} Được áp dụng tại backend NestJS nhằm tách biệt nghiêm ngặt các mối quan tâm (\textit{Separation of Concerns}):
+	      \begin{itemize}
+		      \item \textbf{Tầng trình bày (Presentation Layer):} Tiếp nhận HTTP request, xử lý định tuyến, kiểm tra tính hợp lệ dữ liệu đầu vào (\texttt{ValidationPipe}), và phân quyền/bảo vệ tuyến (\texttt{Guards}).
+		      \item \textbf{Tầng nghiệp vụ (Domain/Application Service Layer):} Đóng gói toàn bộ logic nghiệp vụ, quản lý transaction CSDL, kiểm tra tồn kho, tính toán đơn giá/khuyến mãi, và máy trạng thái đơn hàng (\textit{Order State Machine}).
+		      \item \textbf{Tầng hạ tầng (Infrastructure/Persistence Layer):} Quản lý kết nối PostgreSQL qua Prisma Client wrapper, ghi nhật ký có cấu trúc ra \texttt{stdout}, và kết nối cổng thanh toán giả lập.
+	      \end{itemize}
+\end{itemize}
+
+\begin{calloutbox}[NGUYÊN TẮC THIẾT KẾ CỐT LÕI (SERVER-AUTHORITATIVE)]
+	Mọi tính toán về tiền tệ, chiết khấu khuyến mãi, điểm thưởng tích lũy và chuyển đổi trạng thái đơn hàng \textbf{bắt buộc phải do Backend NestJS quyết định và kiểm chứng lại từ CSDL}. Frontend Next.js hoàn toàn không có thẩm quyền quyết định đơn giá; frontend chỉ duy trì trạng thái giỏ hàng tạm thời và đóng vai trò hiển thị trực quan (View/Presentation).
+\end{calloutbox}
+
+% ==============================================================================
+\section{Mô hình kiến trúc C4 -- Cấp độ 1 \& 2}
+
+\subsection{C4 Level 1: System Context (Bối cảnh hệ thống)}
+
+\begin{table}[h!]
+	\small
+	\centering
+	\begin{tabular}{p{3.2cm} p{2.8cm} p{8.5cm}}
+		\toprule
+		\rowcolor{tableheader}
+		\textbf{Thành phần}            & \textbf{Phân loại} & \textbf{Trách nhiệm và Giao tiếp}                                                                                                         \\
+		\midrule
+		\textbf{Khách hàng (Customer)} & Actor chính        & Xem thực đơn, tùy biến đồ uống, quản lý giỏ hàng, đặt đơn, thanh toán Ví/Thẻ và theo dõi trạng thái đơn hàng.                             \\
+		\textbf{Nhân viên / Barista}   & Actor phụ          & Tiếp nhận đơn hàng đã thanh toán thành công, thực hiện pha chế và chuyển trạng thái đơn (Phạm vi mở rộng ngoài MVP).                      \\
+		\textbf{Quản trị viên / PO}    & Actor phụ          & Quản lý danh mục món, giá bán, công thức topping và các chiến dịch mã khuyến mãi.                                                         \\
+		\textbf{Hệ thống BrewLite}     & System Boundary    & Toàn bộ ứng dụng bao gồm Web App PWA, REST API, Database PostgreSQL và Mock Payment Gateway.                                              \\
+		\textbf{Mock Payment Gateway}  & Hệ thống tích hợp  & Mô phỏng cổng trung gian thanh toán Ví điện tử (Momo/VNPay) hoặc Thẻ (Stripe), tiếp nhận lệnh \texttt{charge} và trả về kết quả xác định. \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Ranh giới bảo mật quy định: Khách hàng chỉ tương tác với hệ thống thông qua giao thức an toàn \textbf{HTTPS (Port 443)}. Cơ sở dữ liệu PostgreSQL hoàn toàn không mở cổng truy cập công khai ra ngoài mạng Internet.
+
+\subsection{C4 Level 2: Container Diagram (Các khối chứa)}
+
+\begin{table}[h!]
+	\small
+	\centering
+	\begin{tabular}{p{2.6cm} p{3.2cm} p{4.8cm} p{1.6cm} p{2.5cm}}
+		\toprule
+		\rowcolor{tableheader}
+		\textbf{Container}    & \textbf{Công nghệ}                             & \textbf{Trách nhiệm chính}                                                    & \textbf{Cổng}       & \textbf{Giao thức}  \\
+		\midrule
+		\textbf{Web App}      & Next.js 20, React 19, TailwindCSS, Zustand     & Giao diện mobile-first/PWA, client cache, render menu SSR/CSR, checkout       & \$PORT (3000 local) & HTTPS / REST JSON   \\
+		\textbf{REST API}     & NestJS 10, TypeScript, Prisma Client, Passport & Toàn bộ nghiệp vụ đơn, kho, khuyến mãi, máy trạng thái, kiểm soát token JWT   & \$PORT (4000 local) & HTTPS / REST JSON   \\
+		\textbf{Database}     & PostgreSQL 15 (Alpine Linux)                   & Lưu trữ quan hệ: Users, Products, Orders, Payments, Promotions, Loyalty. ACID & 5432 (internal)     & Prisma Engine / TCP \\
+		\textbf{Mock Payment} & NestJS Module (\texttt{payments/gateway})      & Mô phỏng xử lý giao dịch thanh toán Ví/Thẻ, hỗ trợ kiểm thử idempotent        & Nội bộ API          & In-process / REST   \\
+		\textbf{Registry}     & Docker Hub                                     & Lưu trữ các Docker image đã đóng gói theo commit SHA tag và release latest    & 443                 & HTTPS / Docker v2   \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+% ==============================================================================
+\section{Mô hình kiến trúc C4 -- Cấp độ 3 (Component Backend NestJS)}
+
+Backend NestJS được thiết kế theo nguyên tắc \textbf{Modular Monolith}. Ứng dụng được chia tách thành các Domain Module chuyên biệt, phản ánh chính xác cấu trúc thư mục mã nguồn tại \texttt{apps/api/src/}.
+
+\subsection{Cấu trúc phân lớp nội bộ của từng Module}
+
+Mỗi Module nghiệp vụ tuân thủ cấu trúc 3 tầng:
+\begin{enumerate}
+	\item \textbf{Controller (\texttt{*.controller.ts}):} Tiếp nhận HTTP Request, trích xuất \texttt{@Body}, \texttt{@Query}, \texttt{@Param}, gán các \texttt{@UseGuards(JwtAuthGuard)} để bảo vệ tài nguyên, và ánh xạ DTO trả về. Controller tuyệt đối \textbf{không chứa logic tính toán nghiệp vụ} và \textbf{không truy cập trực tiếp PrismaService}.
+	\item \textbf{Service (\texttt{*.service.ts}):} Nơi thực thi toàn bộ quy tắc nghiệp vụ. Quản lý các giao dịch nguyên tử (\texttt{prisma.\$transaction}), kích hoạt máy trạng thái, kiểm tra tính hợp lệ của kho hàng và mã giảm giá.
+	\item \textbf{Repository / Data Access (\texttt{prisma.service.ts}):} Đóng gói thao tác truy vấn CSDL PostgreSQL thông qua Prisma Client, hỗ trợ Type-Safe ở thời điểm biên dịch.
+\end{enumerate}
+
+\begin{lstlisting}[language=bash]
+apps/api/src/
+|-- main.ts                     # Bootstrap API, CORS allowlist, ValidationPipe, Global Filters
+|-- app.module.ts               # Module goc ket noi cac domain module
+|-- config/configuration.ts     # Tai va kiem tra bien moi truong (Environment Schema)
+|-- common/
+|   |-- filters/                # AllExceptionsFilter -> Chuan hoa JSON phan hoi loi
+|   |-- interceptors/           # LoggingInterceptor -> Gan requestId, do thoi gian
+|   `-- guards/                 # JwtAuthGuard, RolesGuard
+|-- prisma/
+|   |-- prisma.module.ts
+|   `-- prisma.service.ts       # Wrapper ket noi co so du lieu PostgreSQL
+`-- modules/
+    |-- health/                 # Giam sat suc khoe he thong (GET /health)
+    |-- products/               # Quan ly danh muc thuc don, tuy chon size va topping
+    |-- auth/                   # Dang ky, dang nhap bcrypt, phat hanh va xac thuc JWT
+    |-- orders/                 # Xu ly tao don, khoa lac quan ton kho, may trang thai don
+    |-- payments/               # Thanh toan Idempotent, tich hop Mock Payment Gateway
+    |-- promotions/             # Xac thuc ma giam gia va tinh toan so tien khau tru
+    `-- loyalty/                # Tich luy diem thuong thanh vien sau khi thanh toan
+\end{lstlisting}
+
+\subsection{Bảng đặc tả API Endpoint và Phân quyền}
+
+\begin{table}[h!]
+	\small
+	\centering
+	\begin{tabular}{p{1.4cm} p{4.6cm} p{2cm} p{1.8cm} p{4.6cm}}
+		\toprule
+		\rowcolor{tableheader}
+		\textbf{Method} & \textbf{Endpoint}                    & \textbf{Module} & \textbf{Auth} & \textbf{Yêu cầu \& Ghi chú}                \\
+		\midrule
+		\texttt{GET}    & \texttt{/health}                     & Health          & Public        & NFR-04: Kiểm tra trạng thái API \& DB      \\
+		\texttt{GET}    & \texttt{/api/v1/products}            & Products        & Public        & FR-01: Lấy danh sách menu, lọc danh mục    \\
+		\texttt{GET}    & \texttt{/api/v1/products/:id}        & Products        & Public        & FR-02: Chi tiết món, giá size \& topping   \\
+		\texttt{POST}   & \texttt{/api/v1/auth/register}       & Auth            & Public        & FR-06: Đăng ký tài khoản khách hàng mới    \\
+		\texttt{POST}   & \texttt{/api/v1/auth/login}          & Auth            & Public        & FR-07: Đăng nhập, bcrypt, trả JWT token    \\
+		\texttt{POST}   & \texttt{/api/v1/orders}              & Orders          & Bearer JWT    & FR-09: Tạo đơn hàng, trừ kho (Transaction) \\
+		\texttt{GET}    & \texttt{/api/v1/orders/me}           & Orders          & Bearer JWT    & FR-12: Xem lịch sử đơn của người dùng      \\
+		\texttt{GET}    & \texttt{/api/v1/orders/:id}          & Orders          & Bearer JWT    & FR-12: Lấy chi tiết đơn hàng theo ID       \\
+		\texttt{PATCH}  & \texttt{/api/v1/orders/:id/status}   & Orders          & JWT (Staff)   & FR-13: Chuyển trạng thái đơn               \\
+		\texttt{POST}   & \texttt{/api/v1/payments}            & Payments        & Bearer JWT    & FR-10: Thanh toán đơn có Idempotency-Key   \\
+		\texttt{POST}   & \texttt{/api/v1/promotions/validate} & Promotions      & Bearer JWT    & FR-14: Kiểm tra tính hợp lệ mã giảm giá    \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+% ==============================================================================
+\section{Thiết kế Frontend Next.js Mobile-First / PWA}
+
+\subsection{Kiến trúc Rendering hỗn hợp (App Router Hybrid)}
+
+Ứng dụng Frontend sử dụng Next.js với kiến trúc App Router, tối ưu hóa trải nghiệm tải trang trên thiết bị di động:
+\begin{itemize}
+	\item \textbf{Server Components (RSC):} Trang thực đơn chính (\texttt{/menu}) và trang chi tiết sản phẩm sử dụng Server Component để truy vấn dữ liệu từ API hoặc render trước khung HTML. Điều này giúp tối ưu hóa chỉ số First Contentful Paint (FCP), cải thiện SEO và giảm dung lượng gói JavaScript gửi tới trình duyệt khách hàng.
+	\item \textbf{Client Components (\texttt{"use client"}):} Các thành phần tương tác cao như bộ chọn Size/Topping, Drawer giỏ hàng, Form đăng nhập và Màn hình thanh toán được đóng gói dưới dạng Client Components, tận dụng React Hooks để tương tác mượt mà, không giật lag.
+\end{itemize}
+
+\subsection{Trải nghiệm Mobile-First và Progressive Web App (PWA)}
+
+\begin{itemize}
+	\item \textbf{Thiết kế giao diện Mobile-First:} Sử dụng TailwindCSS xây dựng giao diện tối ưu hóa cho màn hình điện thoại di động (chiều rộng cơ sở 360px -- 414px), hỗ trợ thanh điều hướng đáy (\textit{Bottom Navigation Bar}) và thao tác chạm một tay thuận tiện. Giao diện tự động mở rộng thích ứng (Responsive) lên Tablet và Desktop qua hệ thống Breakpoint (\texttt{md:}, \texttt{lg:}).
+	\item \textbf{Web App Manifest \& Service Worker:} Tệp cấu hình \texttt{public/manifest.webmanifest} cung cấp đầy đủ tên ứng dụng, icon chuẩn hiển thị trên màn hình chính (\textit{Add to Home Screen}), chế độ hiển thị \texttt{standalone} không thanh địa chỉ trình duyệt. Service Worker hỗ trợ lưu trữ bộ nhớ đệm (\textit{Cache-first}) cho các tài nguyên tĩnh (\texttt{.js}, \texttt{.css}, SVG, hình ảnh), bảo đảm ứng dụng vẫn khởi động được ngay cả khi mất kết nối mạng tạm thời (NFR-06).
+\end{itemize}
+
+\subsection{Quản lý trạng thái và Bảo mật Client-Side}
+
+\begin{itemize}
+	\item \textbf{Quản lý giỏ hàng với Zustand:} Toàn bộ danh sách món đã chọn, số lượng và topping được quản lý thông qua Zustand Store kết hợp middleware \texttt{persist} lưu trữ vào \texttt{localStorage}. Nhờ đó, người dùng không bị mất giỏ hàng khi tải lại trang hoặc vô tình đóng ứng dụng (AC-05-7).
+	\item \textbf{Quản lý phiên đăng nhập:} Access Token (JWT) được lưu trữ tại bộ nhớ trình duyệt (\texttt{localStorage}) và tự động gắn vào Header \texttt{Authorization: Bearer <token>} thông qua Axios/Fetch Interceptor. Khi API phản hồi mã lỗi \texttt{401 Unauthorized}, hệ thống tự động dọn dẹp phiên và điều hướng người dùng về trang đăng nhập.
+\end{itemize}
+
+% ==============================================================================
+\section{Cơ sở dữ liệu PostgreSQL và Cơ chế Migration}
+
+\subsection{Thiết kế Mô hình Dữ liệu quan hệ (Prisma Schema)}
+
+PostgreSQL 15 được lựa chọn làm cơ sở dữ liệu chính, bảo đảm tính toàn vẹn dữ liệu và tuân thủ chặt chẽ các đặc tính ACID trong môi trường giao dịch thương mại:
+
+\begin{table}[h!]
+	\small
+	\centering
+	\begin{tabular}{p{2.8cm} p{3.2cm} p{8.5cm}}
+		\toprule
+		\rowcolor{tableheader}
+		\textbf{Thực thể (Model)}   & \textbf{Khóa chính / Index}                      & \textbf{Mô tả thuộc tính \& Ràng buộc toàn vẹn}                                                                                                               \\
+		\midrule
+		\textbf{User}               & \texttt{id} (Int, Auto), \texttt{email} (UQ)     & Tài khoản, mật khẩu băm \texttt{passwordHash} (bcrypt), vai trò \texttt{role} (CUSTOMER, STAFF, ADMIN), điểm \texttt{loyaltyPoints}.                          \\
+		\textbf{Product}            & \texttt{id} (Int, Auto), \texttt{category} (Idx) & Tên món, đơn giá cơ bản (\texttt{Decimal(12,2)}), tồn kho \texttt{stock}, phiên bản khóa lạc quan \texttt{version}, khả dụng \texttt{isAvailable}.            \\
+		\textbf{ProductSize}        & \texttt{id} (Int, Auto), \texttt{productId} (FK) & Kích thước (S, M, L) và giá chênh lệch \texttt{priceDelta}. Quan hệ Cascade khi xóa sản phẩm.                                                                 \\
+		\textbf{Topping}            & \texttt{id} (Int, Auto)                          & Món ăn kèm (Trân châu, Thạch, Kem cheese,...) và giá bán. Quan hệ nhiều-nhiều với Product.                                                                    \\
+		\textbf{Order}              & \texttt{id} (Int, Auto), \texttt{code} (Unique)  & Mã đơn \texttt{\#10xx}, \texttt{userId} (FK), trạng thái \texttt{status} (7 bước), \texttt{subtotal}, chiết khấu \texttt{discount}, tổng tiền \texttt{total}. \\
+		\textbf{OrderItem}          & \texttt{id} (Int, Auto), \texttt{orderId} (FK)   & Chi tiết từng món, snapshot giá tại thời điểm đặt, size, số lượng và tổng dòng \texttt{lineTotal}.                                                            \\
+		\textbf{Payment}            & \texttt{id} (Int), \texttt{idempotencyKey} (UQ)  & Phương thức \texttt{method} (WALLET, CARD), số tiền \texttt{amount}, trạng thái \texttt{status} (SUCCESS, FAILED), mã giao dịch đối tác.                      \\
+		\textbf{Promotion}          & \texttt{id} (Int, Auto), \texttt{code} (Unique)  & Mã giảm giá, loại \texttt{discountType} (PERCENT, FIXED\_AMOUNT), giá trị giảm, đơn tối thiểu, hạn dùng.                                                      \\
+		\textbf{LoyaltyTransaction} & \texttt{id} (Int, Auto), \texttt{userId} (FK)    & Nhật ký điểm thưởng: loại \texttt{type} (EARN, REDEEM), số điểm thay đổi, thời gian giao dịch.                                                                \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\subsection{Cơ chế Database Migration an toàn trong CI/CD và Production}
+
+Hệ thống tuân thủ quy trình kiểm soát phiên bản CSDL nghiêm ngặt thông qua Prisma Migrate:
+\begin{enumerate}
+	\item \textbf{Tạo Migration trong môi trường phát triển (Local):} Khi thay đổi schema, lập trình viên chạy lệnh \texttt{npx prisma migrate dev --name <ten>}. Prisma tự động đối chiếu schema và tạo một tệp migration SQL lưu vào thư mục \texttt{apps/api/prisma/migrations/}. Tệp này bắt buộc phải commit vào kho mã nguồn Git.
+	\item \textbf{Nguyên tắc Additive Migration:} Trên môi trường Production, tuyệt đối không chạy các lệnh nguy hiểm như \texttt{prisma migrate reset} hoặc \texttt{prisma db push}. Mọi thay đổi schema phải mang tính chất bổ sung (\textit{Additive}) -- không xóa ngay cột dữ liệu cũ khi dịch vụ đang chạy để tránh đứt gãy tương thích ngược.
+	\item \textbf{Tự động áp dụng khi khởi chạy Container:} Trong Dockerfile của backend NestJS, lệnh khởi chạy vùng chứa (\textit{Container Entrypoint}) được thiết lập:
+	      \begin{lstlisting}[language=bash]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+  \end{lstlisting}
+	      Lệnh \texttt{prisma migrate deploy} kiểm tra bảng \texttt{\_prisma\_migrations} trong PostgreSQL, so sánh hash các tệp migration và chỉ chạy các migration mới chưa áp dụng một cách an toàn và mang tính lũy thừa (\textit{Idempotent}). Nếu quá trình migrate thất bại, container sẽ dừng ngay lập tức, ngăn ngừa rủi ro chạy mã mới trên CSDL cũ.
+	\item \textbf{Dữ liệu mẫu chuẩn (Database Seeding):} Tập lệnh \texttt{apps/api/prisma/seed.ts} bảo đảm tái lập dữ liệu kiểm thử bất kỳ lúc nào với ít nhất 8 đồ uống mẫu, 3 kích cỡ, 4 loại topping, 2 mã khuyến mãi và 1 tài khoản người dùng thử nghiệm. Tập lệnh sử dụng lệnh \texttt{upsert} để bảo đảm an toàn khi chạy lại nhiều lần không sinh dữ liệu trùng lặp (AC-16-3).
+\end{enumerate}
+
+\subsection{Quản lý đồng thời và Khóa tồn kho (Optimistic Locking)}
+
+Để giải quyết bài toán xung đột dữ liệu khi nhiều khách hàng cùng đặt món cuối cùng trong kho tại cùng một thời điểm:
+\begin{itemize}
+	\item Trường \texttt{Product.version} (kiểu Int, mặc định 0) được áp dụng kỹ thuật \textbf{Khóa lạc quan (Optimistic Concurrency Control)}.
+	\item Khi trừ tồn kho, câu lệnh cập nhật kết hợp điều kiện phiên bản và số lượng khả dụng:
+	      \begin{lstlisting}[language=Java]
+const updated = await prisma.product.updateMany({
+  where: {
+    id: productId,
+    stock: { gte: quantity },
+    version: currentVersion
+  },
+  data: {
+    stock: { decrement: quantity },
+    version: { increment: 1 }
+  }
+});
+if (updated.count === 0) {
+  throw new ConflictException("San pham da het hang hoac xung dot phien ban");
+}
+  \end{lstlisting}
+	\item Toàn bộ thao tác kiểm tra tồn kho, tạo bản ghi \texttt{Order}, tạo các dòng \texttt{OrderItem} và cập nhật trừ kho được bao bọc trọn vẹn trong một \textbf{Database Transaction} (\texttt{prisma.\$transaction}). Nếu bất kỳ bước nào thất bại, hệ thống tự động Rollback toàn bộ trạng thái CSDL về nguyên trạng ban đầu (NFR-03, AC-09-9).
+\end{itemize}
+
+% ==============================================================================
+\section{Dịch vụ thanh toán mô phỏng và Cơ chế Idempotency}
+
+\subsection{Thiết kế Cổng thanh toán mô phỏng (Mock Payment Service)}
+
+Do phạm vi bài tập học phần không yêu cầu ký hợp đồng cổng thanh toán thật với ngân hàng thương mại, hệ thống xây dựng module mô phỏng độc lập (\texttt{payments/gateway}) tuân thủ nguyên tắc Đảo ngược phụ thuộc (\textit{Dependency Inversion}):
+\begin{itemize}
+	\item Định nghĩa Interface trừu tượng \texttt{PaymentGateway} với phương thức:
+	      \begin{lstlisting}[language=Java]
+interface PaymentGateway {
+  charge(payload: ChargeRequestDto): Promise<PaymentResultDto>;
+}
+  \end{lstlisting}
+	\item Lớp cài đặt \texttt{MockPaymentGateway} cung cấp endpoint \texttt{POST /api/v1/payment-gateway/charge}. Kết quả giao dịch được mô phỏng ngẫu nhiên dựa trên tham số môi trường \texttt{PAYMENT\_SUCCESS\_RATE} (mặc định 0.9 -- tương đương 90\% thành công).
+	\item \textbf{Chế độ kiểm thử tất định (Deterministic Test Mode):} Trong môi trường kiểm thử tự động (\texttt{NODE\_ENV=test}), cổng thanh toán sẽ phản hồi kết quả dựa trên số tiền hoặc tham số quy ước đặc biệt trong payload, bảo đảm các kịch bản kiểm thử Integration và E2E luôn ổn định 100\%, không bị flaky test.
+\end{itemize}
+
+\subsection{Cơ chế bảo đảm tính Idempotency với Idempotency-Key}
+
+Để ngăn chặn triệt để hiện tượng khách hàng bấm đúp nút thanh toán hoặc trình duyệt gửi lại request khi mạng chập chờn dẫn đến việc bị trừ tiền hai lần:
+\begin{enumerate}
+	\item \textbf{Phía Client (Next.js):} Khi người dùng nhấn nút xác nhận thanh toán, client tự động sinh một mã định danh duy nhất dạng UUID v4 gán vào Header HTTP:
+	      \begin{center}
+		      \texttt{Idempotency-Key: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d}
+	      \end{center}
+	\item \textbf{Phía Server (NestJS) \& Database (PostgreSQL):} Trường \texttt{Payment.idempotencyKey} được đặt ràng buộc \textbf{UNIQUE} ở mức độ CSDL.
+	\item \textbf{Quy trình xử lý:}
+	      \begin{itemize}
+		      \item Khi nhận yêu cầu \texttt{POST /api/v1/payments}, server kiểm tra trong bảng \texttt{Payment} xem key đã tồn tại hay chưa.
+		      \item \textit{Nếu đã tồn tại:} Trả về ngay kết quả thanh toán trước đó (HTTP 200, \texttt{idempotent: true}), không thực hiện trừ tiền và không cộng điểm thưởng lần hai.
+		      \item \textit{Nếu chưa tồn tại:} Tiến hành gửi yêu cầu tới cổng thanh toán và lưu bản ghi \texttt{Payment} cùng chuyển trạng thái đơn sang \texttt{PAID} trong một transaction duy nhất. Ngay cả khi xảy ra Race Condition giữa hai request song song, ràng buộc UNIQUE của PostgreSQL sẽ chặn đứng request thứ hai và kích hoạt cơ chế trả về kết quả ban đầu.
+	      \end{itemize}
+\end{enumerate}
+
+% ==============================================================================
+\section{Logging, Giám sát Sức khỏe và Quản lý Cấu hình}
+
+\subsection{Ghi nhật ký có cấu trúc (Structured JSON Logging)}
+
+Hệ thống triển khai \texttt{LoggingInterceptor} toàn cục cho toàn bộ API NestJS. Mỗi request đi qua hệ thống đều được cấp phát một mã định danh duy nhất \texttt{requestId} (UUID v4) và ghi nhật ký theo định dạng JSON chuẩn ra \texttt{stdout}:
+\begin{lstlisting}[language=bash]
+{
+  "timestamp": "2026-11-14T09:30:00.123Z",
+  "level": "INFO",
+  "requestId": "c1f7a2d4-482a-4c28-98e3-0d319f39001b",
+  "method": "POST",
+  "url": "/api/v1/orders",
+  "statusCode": 201,
+  "durationMs": 42,
+  "userId": 104
+}
+\end{lstlisting}
+Nhờ cơ chế xuất log ra \texttt{stdout}, vùng chứa Docker không cần ghi tệp cục bộ; nền tảng đám mây (Render) tự động thu thập luồng dữ liệu (\textit{Log Stream}) phục vụ việc theo dõi và gỡ lỗi trực tiếp.
+
+\subsection{Xử lý lỗi tập trung (Global Exception Filter)}
+
+Hệ thống trang bị \texttt{AllExceptionsFilter} ghi đè bộ lọc mặc định của NestJS. Mọi lỗi phát sinh trong hệ thống (Validation, Domain Conflict, Internal Server Error) đều được chuẩn hóa theo cấu trúc đồng nhất:
+\begin{lstlisting}[language=bash]
+{
+  "statusCode": 400,
+  "message": ["qty must not be less than 1"],
+  "error": "Bad Request",
+  "path": "/api/v1/orders",
+  "timestamp": "2026-11-14T09:30:00.125Z",
+  "requestId": "c1f7a2d4-482a-4c28-98e3-0d319f39001b"
+}
+\end{lstlisting}
+Trong môi trường Production (\texttt{NODE\_ENV=production}), toàn bộ Stack Trace kỹ thuật bị ẩn hoàn toàn để ngăn ngừa lộ lỗ hổng an ninh hệ thống (AC-11-4).
+
+\subsection{Giám sát sức khỏe (Health Check Endpoint)}
+
+Endpoint công khai \texttt{GET /health} cung cấp khả năng tự chẩn đoán sức khỏe hệ thống:
+\begin{lstlisting}[language=bash]
+{
+  "status": "ok",
+  "database": "up",
+  "uptime": 3600.45,
+  "timestamp": "2026-11-14T09:30:00.000Z"
+}
+\end{lstlisting}
+Endpoint này được cấu hình trực tiếp làm \textbf{Health Check Path} cho nền tảng Render để xác định thời điểm container sẵn sàng nhận tải, đồng thời đóng vai trò làm bước kiểm thử khói (\textit{Smoke Test}) bắt buộc trong pipeline CD trước khi hoàn tất triển khai.
+
+\subsection{Quản lý Cấu hình và An toàn Thông tin bí mật (Secrets Management)}
+
+\begin{itemize}
+	\item \textbf{Kiểm tra cấu hình lúc khởi động (Fail-Fast):} \texttt{ConfigModule} tích hợp thư viện kiểm tra schema môi trường. Nếu thiếu các biến cốt lõi như \texttt{DATABASE\_URL} hoặc \texttt{JWT\_SECRET}, ứng dụng sẽ chủ động dừng ngay lập tức kèm thông báo lỗi rõ ràng thay vì khởi động sai lệch.
+	\item \textbf{Phân định môi trường và Quản lý Secret:}
+	      \begin{itemize}
+		      \item \textbf{Local Development:} Sử dụng tệp \texttt{.env} sao chép từ mẫu \texttt{.env.example}. Tệp \texttt{.env} được cấu hình nghiêm ngặt trong \texttt{.gitignore} để không bao giờ bị đưa lên kho mã nguồn.
+		      \item \textbf{Continuous Integration (CI):} Khai báo trong \textbf{GitHub Actions Secrets}, chỉ được nạp tạm thời vào môi trường thực thi của Runner khi chạy job kiểm thử.
+		      \item \textbf{Production (Render):} Khai báo trong mục \textbf{Environment Variables} trên Dashboard của Render, được mã hóa khi lưu trữ (\textit{Encryption at-rest}) và truyền qua biến môi trường của container.
+	      \end{itemize}
+\end{itemize}
+
+% ==============================================================================
+\section{Đánh giá Ưu điểm, Hạn chế và Đánh đổi Kiến trúc (Trade-offs)}
+
+\begin{table}[h!]
+	\small
+	\centering
+	\begin{tabular}{p{2.8cm} p{4.6cm} p{5cm} p{1.6cm}}
+		\toprule
+		\rowcolor{tableheader}
+		\textbf{Quyết định}                & \textbf{Ưu điểm (Pros)}                                                                         & \textbf{Nhược điểm \& Đánh đổi (Cons)}                                      & \textbf{Đánh giá}  \\
+		\midrule
+		\textbf{Monorepo} (ADR-001)        & Tài liệu và code đồng bộ version trong 1 PR; dễ kiểm chứng ma trận truy vết; 1 lệnh dựng local. & Dung lượng repo tăng dần; thời gian chạy CI dài hơn nếu không cache tốt.    & Chấp nhận          \\
+		\textbf{Prisma ORM} (ADR-002)      & Type-safety toàn diện; tự động sinh migration; hỗ trợ ràng buộc UNIQUE cho idempotency.         & Query Engine tốn thêm bộ nhớ; kiểu Decimal cần ép kiểu cẩn thận.            & Chấp nhận          \\
+		\textbf{Stateless JWT} (ADR-003)   & Không cần Redis/Session store; dễ mở rộng quy mô ngang; đúng yêu cầu đề bài.                    & Không thu hồi token tức thì trước hạn; lưu localStorage tiềm ẩn rủi ro XSS. & Chấp nhận (TTL 1h) \\
+		\textbf{Mock Gateway} (ADR-004)    & Độc lập, không cần tài khoản ngân hàng thật; demo ổn định trước hội đồng.                       & Không mô phỏng 3D-Secure, Webhook bất đồng bộ hoặc hoàn tiền (Refund).      & Phù hợp MVP        \\
+		\textbf{Optimistic Lock} (ADR-004) & Không giữ lock vật lý lâu trên bảng CSDL; hiệu năng cao khi giao dịch vừa phải.                 & Khi tranh chấp cao sẽ trả 409 buộc client thử lại thay vì tự xếp hàng chờ.  & Chấp nhận          \\
+		\textbf{Server-side Pricing}       & Triệt tiêu hoàn toàn gian lận giá từ client; bảo đảm toàn vẹn tài chính 100\%.                  & Độ trễ cao hơn đôi chút do phải truy vấn CSDL để tính lại giá từ đầu.       & Bắt buộc           \\
+		\textbf{Render PaaS} (ADR-006)     & Cung cấp sẵn HTTPS tự động, Postgres managed, deploy qua Deploy Hook / API.                     & Gói miễn phí có độ trễ khởi động nguội (Cold Start) khi không có traffic.   & Chấp nhận          \\
+		\textbf{Không Refresh Token}       & Giảm thiểu độ phức tạp; tập trung nguồn lực hoàn thiện các tính năng cốt lõi.                   & Người dùng phải đăng nhập lại sau khi phiên làm việc 1 giờ kết thúc.        & Chấp nhận MVP      \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+% ==============================================================================
+\section{Danh mục Bản ghi Quyết định Kiến trúc (ADR Summary)}
+
+\begin{enumerate}
+	\item \textbf{ADR-001: Sử dụng cấu trúc Monorepo với \texttt{apps/} và \texttt{docs/}}
+	      \begin{itemize}
+		      \item \textit{Bối cảnh:} Quản lý đồng thời Next.js, NestJS và hệ thống tài liệu đồ án (SRS, Diagrams, Traceability).
+		      \item \textit{Quyết định:} Chọn Monorepo theo cấu trúc chuẩn của đề bài mà không dùng thêm công cụ phức tạp (Nx/Turborepo) để tránh over-engineering.
+	      \end{itemize}
+	\item \textbf{ADR-002: Backend NestJS kết hợp Prisma ORM và PostgreSQL}
+	      \begin{itemize}
+		      \item \textit{Bối cảnh:} Lựa chọn giải pháp truy cập dữ liệu và biểu diễn trạng thái đơn hàng.
+		      \item \textit{Quyết định:} Chọn Prisma 5 với cơ chế \texttt{prisma migrate deploy}, sử dụng kiểu \texttt{Decimal(12,2)} cho tiền tệ và Enum cho trạng thái đơn.
+	      \end{itemize}
+	\item \textbf{ADR-003: Xác thực người dùng bằng JSON Web Token (Passport JWT)}
+	      \begin{itemize}
+		      \item \textit{Bối cảnh:} Xác thực người dùng phục vụ tạo đơn và xem lịch sử đơn hàng.
+		      \item \textit{Quyết định:} JWT không trạng thái (HS256, thời hạn 1 giờ), mật khẩu băm bcrypt ($\ge 10$), lưu token tại \texttt{localStorage}.
+	      \end{itemize}
+	\item \textbf{ADR-004: Cổng thanh toán mô phỏng, Idempotency-Key và Khóa tồn kho lạc quan}
+	      \begin{itemize}
+		      \item \textit{Bối cảnh:} Xử lý rủi ro thanh toán trùng, bán vượt số lượng tồn kho và nhảy trạng thái đơn sai lệch.
+		      \item \textit{Quyết định:} Module Mock Payment Gateway có interface chuẩn; Idempotency-Key ràng buộc UNIQUE tại DB; Khóa lạc quan qua \texttt{Product.version}.
+	      \end{itemize}
+	\item \textbf{ADR-005: Sử dụng Docker Compose cho Local và GitHub Actions cho CI/CD}
+	      \begin{itemize}
+		      \item \textit{Bối cảnh:} Đảm bảo tính nhất quán môi trường phát triển và tự động hóa kiểm thử/đóng gói.
+		      \item \textit{Quyết định:} File \texttt{docker-compose.yml} chạy 3 container ở local; Pipeline GitHub Actions thực hiện kiểm tra chất lượng (Lint, Test, Build, Push Docker Hub).
+	      \end{itemize}
+	\item \textbf{ADR-006: Triển khai môi trường Production trên nền tảng Render (PaaS)}
+	      \begin{itemize}
+		      \item \textit{Bối cảnh:} Yêu cầu bàn giao sản phẩm có URL HTTPS công khai, database nội bộ an toàn và cơ chế rollback.
+		      \item \textit{Quyết định:} Thiết lập 2 Web Service Docker (\texttt{brewlite-web}, \texttt{brewlite-api}) và 1 PostgreSQL Managed nội bộ trên Render.
+	      \end{itemize}
+\end{enumerate}
+
+% ==============================================================================
+\section{Đối chiếu Tiêu chuẩn Nghiệm thu Task 3.1 (Assignment 2)}
+
+\begin{table}[h!]
+	\small
+	\centering
+	\begin{tabular}{p{5.5cm} p{2.2cm} p{6.5cm}}
+		\toprule
+		\rowcolor{tableheader}
+		\textbf{Yêu cầu bắt buộc của Task 3.1}              & \textbf{Mức độ} & \textbf{Vị trí thể hiện trong báo cáo \& mã nguồn}              \\
+		\midrule
+		Frontend Next.js theo hướng mobile-first/PWA        & Đạt 100\%       & Mục 4 của tài liệu; mã nguồn tại \texttt{apps/web/}             \\
+		Backend NestJS theo module / domain                 & Đạt 100\%       & Mục 3 của tài liệu; mã nguồn tại \texttt{apps/api/src/modules/} \\
+		PostgreSQL và cơ chế migration an toàn              & Đạt 100\%       & Mục 5 của tài liệu; ADR-002; \texttt{apps/api/prisma/}          \\
+		Dịch vụ thanh toán mô phỏng và idempotency          & Đạt 100\%       & Mục 6 của tài liệu; ADR-004; \texttt{payments/gateway}          \\
+		Logging có cấu trúc, health check, quản lý cấu hình & Đạt 100\%       & Mục 7 của tài liệu; endpoint \texttt{/health}                   \\
+		Lý do chọn kiến trúc, ưu điểm, hạn chế và trade-off & Đạt 100\%       & Mục 1, Mục 8 và bảng phân tích trade-off                        \\
+		Các quyết định quan trọng được ghi thành ADR        & Đạt 100\%       & Mục 9 của tài liệu; thư mục \texttt{docs/architecture/adr/}     \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\vspace{15pt}
+\begin{center}
+	\itshape\color{darktext} --- Hết tài liệu Báo cáo Kiến trúc Phần mềm BrewLite (Task 3.1) ---
+\end{center}
+
+\end{document}
