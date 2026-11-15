@@ -29,35 +29,11 @@ Ca sử dụng mô tả chuỗi hành vi nghiệp vụ hoàn chỉnh của hệ 
 
 ## 3. Sơ Đồ Use-Case Phạm Vi Đặt và Thanh Toán (Use-Case Diagram)
 
-Sơ đồ mô hình hóa mối quan hệ giữa các hành vi trong phạm vi thanh toán theo chuẩn UML:
+Sơ đồ mô hình hóa chi tiết mối quan hệ giữa các hành vi trong phạm vi thanh toán theo chuẩn UML:
 
-```mermaid
-flowchart LR
-    Customer((Khách hàng))
-    PG((Cổng thanh toán))
+![Sơ đồ Use-Case Đặt và thanh toán đơn](../diagrams/usecase-checkout.png)
 
-    subgraph Scope_Checkout ["PHẠM VI ĐẶT VÀ THANH TOÁN ĐƠN HÀNG (UC-07)"]
-        UC_Main(["Đặt và thanh toán đơn hàng"])
-        UC_Auth(["Xác thực tài khoản / JWT"])
-        UC_Stock(["Kiểm tra & Khóa tồn kho"])
-        UC_Pay(["Thực thi giao dịch thanh toán"])
-        UC_Voucher(["Áp dụng mã giảm giá"])
-        UC_Loyalty(["Tích lũy điểm thưởng"])
-        UC_Fail(["Xử lý thanh toán lỗi"])
-    end
-
-    Customer --> UC_Main
-
-    UC_Main -.->|"<<include>>"| UC_Auth
-    UC_Main -.->|"<<include>>"| UC_Stock
-    UC_Main -.->|"<<include>>"| UC_Pay
-    UC_Main -.->|"<<include>>"| UC_Loyalty
-
-    UC_Main -.->|"<<extend>>"| UC_Voucher
-    UC_Pay -.->|"<<extend>>"| UC_Fail
-
-    UC_Pay --> PG
-```
+*(Tệp hình ảnh được lưu trữ tại `docs/diagrams/usecase-checkout.png`)*.
 *(Mã nguồn PlantUML lưu tại: `docs/diagrams/usecase-checkout.puml`)*.
 
 ---

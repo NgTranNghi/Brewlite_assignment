@@ -131,31 +131,8 @@
 
 # 3. Sơ Đồ Use-Case Tổng Quát Toàn Hệ Thống
 
-Sơ đồ thể hiện ranh giới hệ thống (*System Boundary*), các tác nhân ngoài (*Actors*) và mối quan hệ `<<include>>`, `<<extend>>` giữa các ca sử dụng cốt lõi:
+Sơ đồ mô hình hóa toàn diện các ca sử dụng trong hệ thống BrewLite, phân định ranh giới hệ thống và các tác nhân tương tác:
 
-```mermaid
-flowchart LR
-    Customer((Khách hàng))
-    PG((Cổng thanh toán))
+![Sơ đồ Use-Case tổng quát](../diagrams/usecase-overview.png)
 
-    subgraph BrewLite_System ["HỆ THỐNG BREWLITE"]
-        UC1(["Xem thực đơn"])
-        UC2(["Tùy biến món & Giỏ hàng"])
-        UC3(["Đăng nhập"])
-        UC4(["Đặt đơn hàng"])
-        UC5(["Thanh toán đơn hàng"])
-        UC6(["Theo dõi đơn & Lịch sử"])
-        UC7(["Áp dụng khuyến mãi"])
-    end
-
-    Customer --> UC1
-    Customer --> UC2
-    Customer --> UC4
-    Customer --> UC6
-
-    UC4 -.->|"<<include>>"| UC3
-    UC4 -.->|"<<include>>"| UC5
-    UC5 -.->|"<<extend>>"| UC7
-    UC5 --> PG
-```
-*(Chi tiết mã nguồn PlantUML lưu tại `docs/diagrams/usecase-overview.puml`)*.
+*(Tệp hình ảnh được lưu trữ tại `docs/diagrams/usecase-overview.png`)*.
